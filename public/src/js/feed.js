@@ -4,6 +4,8 @@ var closeCreatePostModalButton = document.querySelector('#close-create-post-moda
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
+  
+  //manipulating banner on the click of button
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
