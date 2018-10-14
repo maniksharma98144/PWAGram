@@ -125,7 +125,7 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
-  fetch(url, {
+  fetch("https://us-central1-pwagram-f75be.cloudfunctions.net/storePostData", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
