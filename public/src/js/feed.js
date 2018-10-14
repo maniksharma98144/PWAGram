@@ -2,10 +2,15 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
+var titleInput = document.querySelector('#title');
+var locationInput = document.querySelector('#location');
 
 function openCreatePostModal() {
-  //createPostArea.style.display = 'block';
+  // createPostArea.style.display = 'block';
+  // setTimeout(function() {
   createPostArea.style.transform = 'translateY(0)';
+  // }, 1);
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -33,8 +38,8 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  //createPostArea.style.display = 'none';
   createPostArea.style.transform = 'translateY(100vh)';
+  // createPostArea.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -66,8 +71,6 @@ function createCard(data) {
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = 'url(' + data.image + ')';
   cardTitle.style.backgroundSize = 'cover';
-  cardTitle.style.backgroundPosition = 'bottom';
-  cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color = 'white';
@@ -120,3 +123,59 @@ if ('indexedDB' in window) {
       }
     });
 }
+
+function sendData() {
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image: 'https://firebasestorage.googleapis.com/v0/b/pwagram-f75be.appspot.com/o/sf-boat.jpg?alt=media&token=e7328c7a-164d-43ac-b85a-bc87607618a8'
+    })
+  })
+    .then(function (res) {
+      console.log('Sent data', res);
+      updateUI();
+    })
+}
+
+form.addEventListener('submit', function (event) {
+  event.preventDefault();
+
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please enter valid data!');
+    return;
+  }
+
+  closeCreatePostModal();
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+      .then(function (sw) {
+        var post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value
+        };
+        writeData('sync-posts', post)
+          .then(function () {
+            return sw.sync.register('sync-new-posts');
+          })
+          .then(function () {
+            var snackbarContainer = document.querySelector('#confirmation-toast');
+            var data = { message: 'Your Post was saved for syncing!' };
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
+      });
+  } else {
+    sendData();
+  }
+});
