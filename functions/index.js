@@ -7,7 +7,7 @@ var cors = require('cors')({ origin: true });
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
 
-var serviceAccount = require("./pwagram-f75be-firebase-adminsdk-usg5j-b07bd3cda5");
+var serviceAccount = require("./pwagram");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
